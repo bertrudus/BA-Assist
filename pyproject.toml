@@ -1,0 +1,32 @@
+[tool.poetry]
+name = "ba-analyser"
+version = "0.1.0"
+description = "BA artifact analysis tool powered by Amazon Bedrock (Claude)"
+authors = []
+readme = "README.md"
+packages = [{include = "ba_analyser", from = "src"}]
+
+[tool.poetry.scripts]
+ba-analyser = "ba_analyser.cli:app"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+boto3 = "^1.35"
+typer = {extras = ["all"], version = "^0.15"}
+pydantic = "^2.10"
+pydantic-settings = "^2.7"
+rich = "^13.9"
+tenacity = "^9.0"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.3"
+pytest-cov = "^6.0"
+moto = {extras = ["bedrock"], version = "^5.0"}
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
