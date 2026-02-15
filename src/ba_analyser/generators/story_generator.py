@@ -5,7 +5,6 @@ import logging
 
 from pydantic import ValidationError
 
-from ba_analyser.bedrock_client import BedrockClient
 from ba_analyser.models import CoverageReport, UserStory
 from ba_analyser.prompts.story_generation import (
     EXTRACT_REQUIREMENTS_PROMPT,
@@ -22,7 +21,7 @@ logger = logging.getLogger(__name__)
 class StoryGenerator:
     """Converts validated requirements into structured user stories."""
 
-    def __init__(self, client: BedrockClient) -> None:
+    def __init__(self, client) -> None:
         self.client = client
 
     def generate(self, requirements_text: str) -> list[UserStory]:
@@ -189,6 +188,7 @@ class StoryGenerator:
             messages=messages,
             system=SYSTEM_PROMPT,
             temperature=self.client.config.bedrock_temperature_generation,
+            max_tokens=16384,
         )
 
     def _parse_stories(self, raw: dict) -> list[UserStory]:

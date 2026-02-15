@@ -4,7 +4,6 @@ import json
 import logging
 from abc import ABC, abstractmethod
 
-from ba_analyser.bedrock_client import BedrockClient
 from ba_analyser.models import (
     AnalysisResult,
     ArtifactType,
@@ -23,7 +22,7 @@ class BaseAnalyser(ABC):
     The analysis pipeline (evaluate per dimension → synthesise) is shared.
     """
 
-    def __init__(self, client: BedrockClient) -> None:
+    def __init__(self, client) -> None:
         self.client = client
 
     @property
@@ -95,6 +94,7 @@ class BaseAnalyser(ABC):
             messages=messages,
             system=self.system_prompt,
             temperature=self.client.config.bedrock_temperature_analysis,
+            max_tokens=8192,
         )
 
     def _build_result(

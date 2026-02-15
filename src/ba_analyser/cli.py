@@ -12,7 +12,6 @@ from ba_analyser.analysers.base import BaseAnalyser
 from ba_analyser.analysers.process_analyser import ProcessAnalyser
 from ba_analyser.analysers.requirements_analyser import RequirementsAnalyser
 from ba_analyser.analysers.story_analyser import StoryAnalyser
-from ba_analyser.bedrock_client import BedrockClient
 from ba_analyser.config import Settings
 from ba_analyser.detector import detect_artifact_type
 from ba_analyser.display import (
@@ -61,6 +60,18 @@ _TYPE_MAP: dict[ArtifactTypeOption, ArtifactType] = {
     ArtifactTypeOption.process: ArtifactType.BUSINESS_PROCESS,
     ArtifactTypeOption.story: ArtifactType.USER_STORY,
 }
+
+
+def _create_client(settings: Settings):
+    """Create the appropriate LLM client based on configuration."""
+    if settings.llm_provider == "anthropic":
+        from ba_analyser.anthropic_client import AnthropicClient
+
+        return AnthropicClient(config=settings)
+    else:
+        from ba_analyser.bedrock_client import BedrockClient
+
+        return BedrockClient(config=settings)
 
 
 def _read_artifact(file: Path) -> str:
@@ -136,7 +147,7 @@ def analyse(
     """Analyse a BA artifact and display results."""
     artifact_text = _read_artifact(file)
     settings = Settings()
-    client = BedrockClient(config=settings)
+    client = _create_client(settings)
 
     artifact_type = _resolve_artifact_type(type, artifact_text, client)
     analyser = _get_analyser(artifact_type, client)
@@ -180,7 +191,7 @@ def iterate(
     """Enter interactive iteration mode: analyse, review, revise, repeat."""
     artifact_text = _read_artifact(file)
     settings = Settings()
-    client = BedrockClient(config=settings)
+    client = _create_client(settings)
     analyser = RequirementsAnalyser(client)
     engine = IterationEngine(client=client, analyser=analyser)
 
@@ -252,7 +263,7 @@ def generate_stories(
     """Convert requirements into user stories."""
     artifact_text = _read_artifact(file)
     settings = Settings()
-    client = BedrockClient(config=settings)
+    client = _create_client(settings)
     generator = StoryGenerator(client)
 
     with display_console.status("[bold]Generating user stories..."):
@@ -309,7 +320,7 @@ def export_claude_code(
     """Generate full Claude Code scaffolding from requirements."""
     artifact_text = _read_artifact(file)
     settings = Settings()
-    client = BedrockClient(config=settings)
+    client = _create_client(settings)
     generator = StoryGenerator(client)
 
     # Generate stories
@@ -355,7 +366,7 @@ def compare(
     text1 = _read_artifact(file1)
     text2 = _read_artifact(file2)
     settings = Settings()
-    client = BedrockClient(config=settings)
+    client = _create_client(settings)
     analyser = RequirementsAnalyser(client)
 
     display_console.print(f"[bold]Analysing {file1.name}...[/bold]")
@@ -407,9 +418,19 @@ def config() -> None:
     table.add_column("Setting", style="bold")
     table.add_column("Value")
 
-    table.add_row("AWS Region", settings.aws_region)
-    table.add_row("AWS Profile", settings.aws_profile or "(default)")
-    table.add_row("Bedrock Model ID", settings.bedrock_model_id)
+    table.add_row("LLM Provider", settings.llm_provider)
+    if settings.llm_provider == "anthropic":
+        table.add_row("Anthropic Model ID", settings.anthropic_model_id)
+        table.add_row(
+            "Anthropic API Key",
+            "***" + settings.anthropic_api_key[-4:]
+            if settings.anthropic_api_key
+            else "(not set)",
+        )
+    else:
+        table.add_row("AWS Region", settings.aws_region)
+        table.add_row("AWS Profile", settings.aws_profile or "(default)")
+        table.add_row("Bedrock Model ID", settings.bedrock_model_id)
     table.add_row("Max Tokens", str(settings.bedrock_max_tokens))
     table.add_row("Analysis Temperature", str(settings.bedrock_temperature_analysis))
     table.add_row("Generation Temperature", str(settings.bedrock_temperature_generation))

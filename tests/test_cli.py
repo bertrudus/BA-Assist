@@ -60,11 +60,11 @@ def fixture_file(tmp_path) -> Path:
 
 
 class TestAnalyseCommand:
-    @patch("ba_analyser.cli.BedrockClient")
+    @patch("ba_analyser.cli._create_client")
     @patch("ba_analyser.cli.RequirementsAnalyser")
     @patch("ba_analyser.cli.detect_artifact_type")
     def test_analyse_terminal_output(
-        self, mock_detect, mock_analyser_cls, mock_client_cls, fixture_file
+        self, mock_detect, mock_analyser_cls, mock_create_client, fixture_file
     ):
         mock_detect.return_value = ArtifactType.REQUIREMENTS_DOCUMENT
         mock_analyser = MagicMock()
@@ -76,11 +76,11 @@ class TestAnalyseCommand:
         assert result.exit_code == 0
         assert "85" in result.output
 
-    @patch("ba_analyser.cli.BedrockClient")
+    @patch("ba_analyser.cli._create_client")
     @patch("ba_analyser.cli.RequirementsAnalyser")
     @patch("ba_analyser.cli.detect_artifact_type")
     def test_analyse_json_output(
-        self, mock_detect, mock_analyser_cls, mock_client_cls, fixture_file
+        self, mock_detect, mock_analyser_cls, mock_create_client, fixture_file
     ):
         mock_detect.return_value = ArtifactType.REQUIREMENTS_DOCUMENT
         mock_analyser = MagicMock()
@@ -94,11 +94,11 @@ class TestAnalyseCommand:
         assert result.exit_code == 0
         assert "overall_score" in result.output
 
-    @patch("ba_analyser.cli.BedrockClient")
+    @patch("ba_analyser.cli._create_client")
     @patch("ba_analyser.cli.RequirementsAnalyser")
     @patch("ba_analyser.cli.detect_artifact_type")
     def test_analyse_markdown_output(
-        self, mock_detect, mock_analyser_cls, mock_client_cls, fixture_file
+        self, mock_detect, mock_analyser_cls, mock_create_client, fixture_file
     ):
         mock_detect.return_value = ArtifactType.REQUIREMENTS_DOCUMENT
         mock_analyser = MagicMock()
@@ -112,11 +112,11 @@ class TestAnalyseCommand:
         assert result.exit_code == 0
         assert "# Analysis Report" in result.output
 
-    @patch("ba_analyser.cli.BedrockClient")
+    @patch("ba_analyser.cli._create_client")
     @patch("ba_analyser.cli.RequirementsAnalyser")
     @patch("ba_analyser.cli.detect_artifact_type")
     def test_analyse_below_threshold_exits_1(
-        self, mock_detect, mock_analyser_cls, mock_client_cls, fixture_file
+        self, mock_detect, mock_analyser_cls, mock_create_client, fixture_file
     ):
         mock_detect.return_value = ArtifactType.REQUIREMENTS_DOCUMENT
         mock_analyser = MagicMock()
@@ -130,10 +130,10 @@ class TestAnalyseCommand:
         assert result.exit_code == 1
         assert "below" in result.output
 
-    @patch("ba_analyser.cli.BedrockClient")
+    @patch("ba_analyser.cli._create_client")
     @patch("ba_analyser.cli.RequirementsAnalyser")
     def test_analyse_explicit_type_skips_detection(
-        self, mock_analyser_cls, mock_client_cls, fixture_file
+        self, mock_analyser_cls, mock_create_client, fixture_file
     ):
         mock_analyser = MagicMock()
         mock_analyser.analyse.return_value = _mock_result()

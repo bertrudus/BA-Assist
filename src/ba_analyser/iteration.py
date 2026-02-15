@@ -3,7 +3,6 @@
 import logging
 
 from ba_analyser.analysers.requirements_analyser import RequirementsAnalyser
-from ba_analyser.bedrock_client import BedrockClient
 from ba_analyser.models import (
     AnalysisResult,
     ArtifactType,
@@ -43,7 +42,7 @@ class IterationEngine:
 
     def __init__(
         self,
-        client: BedrockClient,
+        client,
         analyser: RequirementsAnalyser | None = None,
     ) -> None:
         self.client = client

@@ -2,7 +2,6 @@
 
 import logging
 
-from ba_analyser.bedrock_client import BedrockClient
 from ba_analyser.models import ArtifactType
 
 logger = logging.getLogger(__name__)
@@ -45,7 +44,7 @@ Return ONLY valid JSON:
 
 def detect_artifact_type(
     artifact_text: str,
-    client: BedrockClient,
+    client,
 ) -> ArtifactType:
     """Classify a BA artifact into an ArtifactType.
 
